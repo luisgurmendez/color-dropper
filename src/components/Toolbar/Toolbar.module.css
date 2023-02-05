@@ -1,0 +1,43 @@
+.tools {
+    display: flex;
+    flex-direction: row;
+    padding: 16px 0px;
+    margin-bottom: 8px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.primaryTools {
+    display: flex;
+    flex-direction: row;
+    gap: 32px;
+}
+
+.imageSizeInput {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.colorPicker {
+    border-radius: 50%;
+    padding: 8px;
+    width: fit-content;
+    background: #eee;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.colorPicker:hover {
+    background: #ddd;
+}
+
+.colorPickerSvg {
+    width: 16px;
+    height: 16px;
+}
