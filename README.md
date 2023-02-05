@@ -19,3 +19,25 @@ configs to unlock different behaviors.
 
 ## Test
 To run the tests run `yarn test`
+
+
+## Notes
+
+## Optimization: Reading ImageData
+    Calling `2dContext.getImageData` [is not a fast operation](https://stackoverflow.com/a/19502117/5794675)
+    to be called regularly, an optimization can be done by getting the ImageData once and calculating the
+    dropper's color matrix on mouse move, a performance test was done in branch `lg/preload-image-data-perf`.
+    It was detected that for BIG images (such as the `mountains.jpg` ~5Mb) calculating the colorMatrix 
+    beforehand was a really expensive task, so for this use case 
+    (specially with the use real image size setting on) I opt to call `getImageData` on mousemove
+    with the dropper's size instead. Using the `willReadFrequently` config of the context object
+    gave great results.
+
+
+## Future Optimization: Drawing the Dropper in a canvas
+    In the future, as a fun test I would like to see how drawing the ColorDropper component inside a canvas
+    would perform instead of using plain html & css to draw the grid. I noted that using large number
+    of `<div>`s for the grid is not so great.
+    
+    Although everything that involves drawing shapes is not as easy as using css,
+    it would be really hard to maintain!

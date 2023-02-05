@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import useRelativeMousePosition from "../../hooks/useRelativeMousePosition";
 import { Nullable } from "@/src/types";
 import paintCanvasWhite from "@/src/hooks/usePaintCanvasWhite";
-import { buildRGBAMatrixFromImageData } from "@/src/utils";
 
 interface CanvasProps {
     image: HTMLImageElement;
@@ -167,7 +166,9 @@ function useBuildImageDataOnMouseMove(canvas: Nullable<HTMLCanvasElement>, onIma
     useEffect(() => {
         if (relativeMousePosition != null && ctx != null) {
             if (ctx) {
-                // creates an `ImageData` of a square surrounding the mouse cursor.
+                /**
+                 * Creates an `ImageData` of a square surrounding the mouse cursor.
+                 */
                 const imageData = ctx.getImageData(
                     relativeMousePosition.x - ((imageSize - 1) / 2),
                     relativeMousePosition.y - ((imageSize - 1) / 2),
@@ -182,42 +183,6 @@ function useBuildImageDataOnMouseMove(canvas: Nullable<HTMLCanvasElement>, onIma
 }
 
 export default Canvas;
-
-
-function useBuildImageDataOnMouseMove2(canvas: Nullable<HTMLCanvasElement>, onImageData: ImageDataHanlder, imageSize: number) {
-    const ctx = useCanvasContext(canvas);
-    // Gets the relative position of the mouse inside the canvas element.
-    const relativeMousePosition = useRelativeMousePosition(canvas);
-
-    const imageData = useMemo(() => {
-        if (canvas && ctx) {
-            return buildRGBAMatrixFromImageData(ctx.getImageData(0, 0, canvas.width, canvas.height))
-        }
-        return null;
-    }, [ctx, canvas])
-
-
-    // Whenever the position of the mouse relative to the canvas changes, we want to
-    // build a new `ImageData`.
-    useEffect(() => {
-        if (relativeMousePosition != null && imageData != null) {
-            if (ctx) {
-                // creates an `ImageData` of a square surrounding the mouse cursor.
-                const imageData = ctx.getImageData(
-                    relativeMousePosition.x - ((imageSize - 1) / 2),
-                    relativeMousePosition.y - ((imageSize - 1) / 2),
-                    imageSize,
-                    imageSize
-                );
-                onImageData(imageData);
-            }
-        }
-
-    }, [imageData, imageSize, relativeMousePosition])
-}
-
-
-
 
 function useCanvasContext(canvas: Nullable<HTMLCanvasElement>) {
     return useMemo(() => canvas?.getContext('2d', { willReadFrequently: true }), [canvas]);
