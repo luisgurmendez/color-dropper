@@ -1,22 +1,17 @@
 import { useMemo } from "react";
-import { HEXMatrix, Nullable, RGBAOrRGBMatrix, isRGBA } from "../types";
-import { rgbaArrayToHex } from "../utils";
+import { HEX, HEXMatrix, Nullable, RGB, RGBA, RGBAOrRGBMatrix, isRGBA } from "../types";
+import { buildColorMatrix, rgbaArrayToHex } from "../utils";
 
 // Converts an RGBAMatrix to a HexMatrix.
 function useConvertRGBAMatrixToHexMatrix(matrix: Nullable<RGBAOrRGBMatrix>, useTransparency: boolean = false): Nullable<HEXMatrix> {
     return useMemo(() => {
         if (matrix != null) {
-
-            const hexMatrix: HEXMatrix = {
-                n: matrix.n,
-                m: matrix.m,
-                /// initialize a new matrix nxm with black hex colors
-                colors: Array(matrix.m).fill("empty").map(() => Array(matrix.n).fill("#000"))
-            }
+            const hexMatrix = buildColorMatrix<HEX>(matrix.n, matrix.m, '#00000000');
 
             for (let ni = 0; ni < matrix.n; ni++) {
-                for (let mi = 0; mi < matrix.n; mi++) {
-                    const rgba = matrix.colors[mi][ni]
+                for (let mi = 0; mi < matrix.m; mi++) {
+                    const rgba = [...matrix.colors[mi][ni]] as (RGBA | RGB)
+
                     // removes the alpha value
                     if (isRGBA(rgba) && !useTransparency) {
                         rgba.splice(-1);

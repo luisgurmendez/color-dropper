@@ -1,4 +1,4 @@
-import { RGB, RGBA, RGBAMatrix } from "./types";
+import { ColorMatrix, RGB, RGBA, RGBAMatrix } from "./types";
 
 
 /**
@@ -40,3 +40,13 @@ export const buildRGBAMatrixFromImageData = (imageData: ImageData): RGBAMatrix =
         colors: rgbaMatrix
     }
 };
+
+export const buildColorMatrix = <C>(n: number, m: number, defaultColor: C) => {
+    const _matrix: ColorMatrix<C> = {
+        n: n,
+        m: m,
+        /// initialize a new matrix nxm with black hex colors
+        colors: Array(m).fill("empty").map(() => Array(n).fill(defaultColor))
+    }
+    return _matrix;
+}
