@@ -56,6 +56,7 @@ Altough using the `willReadFrequently` config of the context object gave much be
 lowering the call to ~0.3ms [see here](/benchmarks/with-willreadfrequently).
 With this setting the whole flow of moving the mouse, getting the 
 image data, building the HexMatrix and then rendering the `ColorDropper` it takes about ~3.5ms.
+This approach is in the `lg/frecuently-get-image-data` branch
 
 The second approach involved working with the ImageData directly, and reading these values
 to calculate the HexMatrix everytime the mouse moves. Since the ImageData.data is of type
