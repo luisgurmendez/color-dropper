@@ -21,14 +21,11 @@ export type ColorRepresentation = RGB | RGBA | HEX;
 
 /**
  * Representation of a matrix where it's values represent a color
- *            n
- *    + ------------- +
- *    |               |
- *    |               |
- *    |               |  m
- *    |               |
- *    |               |
- *    + ------------- +
+ *         n
+ *    + ------- +
+ *    |         |
+ *    |         |  m
+ *    + ------- +
  */
 export interface ColorMatrix<ColorRepresentation> {
     colors: ColorRepresentation[][];
