@@ -8,6 +8,7 @@ import useRelativeMousePosition from '@/src/hooks/useRelativeMousePosition';
 import Canvas from '@/src/components/Canvas/Canvas';
 import { buildColorMatrix, rgbaArrayToHex } from '@/src/utils';
 import usePointingColor from '@/src/hooks/usePointingColor';
+
 /// number of rows and cols the dropper grid will have.
 const DROPPER_SIZE = 19;
 
@@ -23,7 +24,6 @@ export default function Home() {
   const isImageFilePNG = useIsImageFilePNG(imageFile);
   const [backgroundImage, _] = useSetBackgroundImage(imageFile);
   useAutoUseTransparencyOnPNGImageFile(isImageFilePNG, setUseTransparency);
-  // const hexColorMatrix = useConvertRGBAMatrixToHexMatrix(colorMatrix, useTransparency);
 
   const handleRGBAMatrixChange = useCallback((d: ImageData) => {
     setImageData(d);
@@ -31,7 +31,6 @@ export default function Home() {
 
   /// Tracks the position of the mouse when it's over the canvas container.
   const position = useRelativeMousePosition(containerRef);
-  // const clippedHexMatrix = useClipColorMatrixToDropperBounds(hexColorMatrix, canvasRef.current);
 
   // Matrix of colors in hex format
   const clippedHexMatrix = useClipImageDataToDropperBounds(imageData, canvasRef.current, useTransparency);
@@ -129,17 +128,12 @@ function useIsImageFilePNG(file: File | undefined) {
   return isPNG;
 }
 
-
-
 function useClipImageDataToDropperBounds(imageData: Nullable<ImageData>, canvas: Nullable<HTMLCanvasElement>, useTransparency: boolean): Nullable<HEXMatrix> {
   const position = useRelativeMousePosition(canvas);
 
   return useMemo(() => {
     if (position != null && imageData != null) {
-
-
       const coordsToImageDataPosition = (_x: number, _y: number) => ((_y * imageDataWidth) + _x) * flattenedRGBALength;
-
       const _matrix = buildColorMatrix<HEX>(DROPPER_SIZE, DROPPER_SIZE, '#00000000');
       const flattenedRGBALength = 4;
       const x = Math.round(position.x - (DROPPER_SIZE / 2)) || 0
@@ -170,40 +164,9 @@ function useClipImageDataToDropperBounds(imageData: Nullable<ImageData>, canvas:
         jRow = [];
       }
       _matrix.colors = hexMatrix;
-      // console.table(_matrix.colors)
       return _matrix;
     }
     return null;
 
   }, [position, imageData, useTransparency])
-
-
-
-}
-
-function useClipColorMatrixToDropperBounds(matrix: HEXMatrix, canvas: Nullable<HTMLCanvasElement>): HEXMatrix {
-  const position = useRelativeMousePosition(canvas);
-
-  return useMemo(() => {
-
-    const _matrix = buildColorMatrix<HEX>(DROPPER_SIZE, DROPPER_SIZE, '#00000000');
-    if (position != null && matrix != null) {
-      const x = Math.round(position.x - (DROPPER_SIZE / 2)) || 0
-      const y = Math.round(position.y - (DROPPER_SIZE / 2)) || 0
-      for (let ni = 0; ni < DROPPER_SIZE; ni++) {
-        for (let mi = 0; mi < DROPPER_SIZE; mi++) {
-          if (mi + y < matrix.m && ni + x < matrix.n) {
-            try {
-              _matrix.colors[mi][ni] = matrix.colors[mi + y][ni + x];
-            } catch (e) {
-              debugger;
-            }
-          }
-        }
-      }
-    }
-
-    return _matrix;
-  }, [position, matrix])
-
 }
