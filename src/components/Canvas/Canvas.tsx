@@ -12,6 +12,10 @@ interface CanvasProps {
 
 }
 
+/**
+ * Component responsible of rendering the canvas, drawing a background image and notify whenever
+ * the ImageData of the canvas changes.
+ */
 const CanvasRefRenderFunction: ForwardRefRenderFunction<Nullable<HTMLCanvasElement>, CanvasProps> = ({
     image,
     handleImageDataChange,
