@@ -1,37 +1,33 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import useRelativeMousePosition from "../../hooks/useRelativeMousePosition";
+import { ForwardRefRenderFunction, forwardRef, useCallback, useEffect, useImperativeHandle, useState } from "react";
 import { Nullable } from "@/src/types";
 import paintCanvasWhite from "@/src/hooks/usePaintCanvasWhite";
+
+type ImageDataHanlder = (matrix: ImageData) => void;
 
 interface CanvasProps {
     image: HTMLImageElement;
     useImageSizeAsCanvasSize: boolean;
     useTransparency: boolean;
-    onImageDataChange: ImageDataHanlder;
-    imageDataSize: number;
+    handleImageDataChange: ImageDataHanlder;
+
 }
 
-// This components controls the main canvas element, it is responsible of
-//  - resizing the canvas
-//  - drawing a background image
-//  and for the sake of simplicity, builds an `ImageData` on mousemove
-const Canvas: React.FC<CanvasProps> = ({
+const CanvasRefRenderFunction: ForwardRefRenderFunction<Nullable<HTMLCanvasElement>, CanvasProps> = ({
     image,
-    onImageDataChange,
+    handleImageDataChange,
     useImageSizeAsCanvasSize,
     useTransparency,
-    imageDataSize
-}) => {
-    const [canvas, setCanvasRef] = useState<Nullable<HTMLCanvasElement>>(null);
+}, canvasRef) => {
+    const [canvas, setCanvas] = useState<Nullable<HTMLCanvasElement>>(null);
+    useImperativeHandle<Nullable<HTMLCanvasElement>, Nullable<HTMLCanvasElement>>(canvasRef, () => canvas, [canvas]);
     const handleResizeCanvas = useResizeCanvasToInitialParentElementSizeHandler(canvas)
     useSetInitialCanvasSize(handleResizeCanvas);
-    useBuildImageDataOnMouseMove(canvas, onImageDataChange, imageDataSize);
-    useDrawBackgroundImage(canvas, image, handleResizeCanvas, useImageSizeAsCanvasSize, useTransparency);
-    return (
-        <canvas ref={(canvasRef) => setCanvasRef(canvasRef)}></canvas>
-    );
+    useDrawBackgroundImage(canvas, image, handleResizeCanvas, handleImageDataChange, useImageSizeAsCanvasSize, useTransparency);
+
+    return <canvas ref={setCanvas} />;
 }
 
+export const Canvas = forwardRef(CanvasRefRenderFunction);
 
 // Draws a background image to the canvas, making it fit the current canvas size, or
 // the image size depending on the `useImageSizeAsCanvasSize` value.
@@ -41,6 +37,7 @@ function useDrawBackgroundImage(
     canvas: Nullable<HTMLCanvasElement>,
     image: HTMLImageElement,
     handleResizeCanvasToParent: () => void,
+    handleImageDataChange: ImageDataHanlder,
     useImageSizeAsCanvasSize: boolean,
     useTransparency: boolean
 ) {
@@ -57,7 +54,7 @@ function useDrawBackgroundImage(
         const drawBackgroundImage = () => {
             if (canvas != null) {
                 handleResizeCanvasToParent();
-                const ctx = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
                 if (ctx) {
 
@@ -95,10 +92,12 @@ function useDrawBackgroundImage(
                             resizedImageWidth,
                             resizedImageHeight);
                     }
+                    if (canvas.width > 0 && canvas.height > 0) {
+                        handleImageDataChange(ctx.getImageData(0, 0, canvas.width, canvas.height))
+                    }
                 }
             }
         }
-
         if (hasImageLoaded) {
             drawBackgroundImage();
         }
@@ -151,39 +150,4 @@ function useSetInitialCanvasSize(handleResize: () => void) {
     useEffect(handleResize, [handleResize]);
 }
 
-type ImageDataHanlder = (img: ImageData) => void;
-
-// Ideally this logic should "live" in a parent component, 
-// and let the `Canvas` component forward the canvas ref to follow single responsability 
-// principles, I didn't do so for the sake of simplicity.
-function useBuildImageDataOnMouseMove(canvas: Nullable<HTMLCanvasElement>, onImageData: ImageDataHanlder, imageSize: number) {
-    const ctx = useCanvasContext(canvas);
-    // Gets the relative position of the mouse inside the canvas element.
-    const relativeMousePosition = useRelativeMousePosition(canvas);
-
-    // Whenever the position of the mouse relative to the canvas changes, we want to
-    // build a new `ImageData`.
-    useEffect(() => {
-        if (relativeMousePosition != null && ctx != null) {
-            if (ctx) {
-                /**
-                 * Creates an `ImageData` of a square surrounding the mouse cursor.
-                 */
-                const imageData = ctx.getImageData(
-                    relativeMousePosition.x - ((imageSize - 1) / 2),
-                    relativeMousePosition.y - ((imageSize - 1) / 2),
-                    imageSize,
-                    imageSize
-                );
-                onImageData(imageData);
-            }
-        }
-
-    }, [ctx, imageSize, relativeMousePosition])
-}
-
 export default Canvas;
-
-function useCanvasContext(canvas: Nullable<HTMLCanvasElement>) {
-    return useMemo(() => canvas?.getContext('2d', { willReadFrequently: false }), [canvas]);
-}

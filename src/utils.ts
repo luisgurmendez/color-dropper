@@ -1,5 +1,4 @@
-import { HEX, HEXMatrix, RGB, RGBA, RGBAMatrix, RGBAOrRGBMatrix, isRGBA } from "./types";
-
+import { ColorMatrix, HEX, HEXMatrix, RGB, RGBA, RGBAMatrix, RGBAOrRGBMatrix, isRGBA } from "./types";
 
 /**
  * Converts a [r, g, b, a] array representinga a RGBA color, to a hex color.
@@ -89,5 +88,14 @@ export const convertRGBAMatrixToHexMatrix = (matrix: RGBAOrRGBMatrix, useTranspa
         }
     }
     return hexMatrix;
+}
 
+export const buildColorMatrix = <C>(n: number, m: number, defaultColor: C) => {
+    const _matrix: ColorMatrix<C> = {
+        n: n,
+        m: m,
+        /// initialize a new matrix nxm with black hex colors
+        colors: Array(m).fill("empty").map(() => Array(n).fill(defaultColor))
+    }
+    return _matrix;
 }
