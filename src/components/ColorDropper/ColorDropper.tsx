@@ -1,12 +1,5 @@
-import { useEffect, useImperativeHandle, useMemo, useRef } from "react"
-import { rgbaArrayToHex } from "../../utils";
-import { HEX, HEXMatrix, RGBAMatrix } from "../../types";
+import { HEX, HEXMatrix, Position } from "../../types";
 import styles from './ColorDropper.module.css';
-
-export interface Position {
-    left: number
-    top: number;
-}
 
 interface ColorDropperProps {
     // odd numbered matrix of hex colors.
@@ -26,7 +19,7 @@ interface ColorDropperProps {
 // the `pointingColor`. Here we assume the `hexColorMatrix` has an odd number of rows & cols.
 const ColorDropper: React.FC<ColorDropperProps> = ({ hexColorMatrix, position, pointingColor }) => {
     return (
-        <div className={styles.container} style={position}>
+        <div className={styles.container} style={{ left: position.x, top: position.y }}>
             <div
                 className={styles.changableColorContainer}
                 style={{ borderColor: pointingColor }}

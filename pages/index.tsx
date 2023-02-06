@@ -80,7 +80,7 @@ export default function Home() {
             {_showDropper ? <ColorDropper
               pointingColor={pointingColor}
               hexColorMatrix={clippedHexMatrix}
-              position={{ top: position.y, left: position.x }}
+              position={position}
             /> : undefined
             }
           </div>
