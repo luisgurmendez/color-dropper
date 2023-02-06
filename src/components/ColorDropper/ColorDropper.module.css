@@ -28,7 +28,7 @@
 .gridItem {
     width: 9px;
     height: 9px;
-    border: 0.5px solid #BCC0D1;
+    border: 0.5px solid lightgray;
 }
 
 .centerGridItem {

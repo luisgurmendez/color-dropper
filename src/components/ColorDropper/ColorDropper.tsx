@@ -6,7 +6,8 @@ interface ColorDropperProps {
     hexColorMatrix: HEXMatrix;
     // the position where we should position this element.
     // NOTE, that this position is the actual center of the `ColorDropper` so when setting the
-    // position we should substract the size/2 of itself to center it correctly.
+    // position we should substract the size/2 of itself to center it correctly, we do this
+    // using css.
     position: Position;
     // The center color of the grid.
     pointingColor: HEX;

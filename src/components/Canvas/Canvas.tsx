@@ -5,10 +5,12 @@ import paintCanvasWhite from "@/src/hooks/usePaintCanvasWhite";
 type ImageDataHanlder = (matrix: ImageData) => void;
 
 interface CanvasProps {
+    // The image element that we should draw on the canvas.
     image: HTMLImageElement;
+    // Callback when an image draw is drawn to the canvas so the ImageData changes. 
+    handleImageDataChange: ImageDataHanlder;
     useImageSizeAsCanvasSize: boolean;
     useTransparency: boolean;
-    handleImageDataChange: ImageDataHanlder;
 
 }
 
