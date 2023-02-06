@@ -1,4 +1,4 @@
-## Picsart coding challenge
+## Coding challenge
 
 "Your team needs to create an ability for users to pick a color from canvas.
 The task is to build a color dropper."
