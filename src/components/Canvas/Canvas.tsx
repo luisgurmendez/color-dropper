@@ -8,13 +8,14 @@ interface CanvasProps {
     image: HTMLImageElement;
     useImageSizeAsCanvasSize: boolean;
     useTransparency: boolean;
-    onRGBAMatrixChange: RGBAMatrixHanlder;
+    handleImageDataChange: ImageDataHanlder;
+
 }
 
 
 const CanvasRefRenderFunction: ForwardRefRenderFunction<Nullable<HTMLCanvasElement>, CanvasProps> = ({
     image,
-    onRGBAMatrixChange,
+    handleImageDataChange,
     useImageSizeAsCanvasSize,
     useTransparency,
 }, canvasRef) => {
@@ -22,7 +23,7 @@ const CanvasRefRenderFunction: ForwardRefRenderFunction<Nullable<HTMLCanvasEleme
     useImperativeHandle<Nullable<HTMLCanvasElement>, Nullable<HTMLCanvasElement>>(canvasRef, () => canvas, [canvas]);
     const handleResizeCanvas = useResizeCanvasToInitialParentElementSizeHandler(canvas)
     useSetInitialCanvasSize(handleResizeCanvas);
-    useDrawBackgroundImage(canvas, image, handleResizeCanvas, onRGBAMatrixChange, useImageSizeAsCanvasSize, useTransparency);
+    useDrawBackgroundImage(canvas, image, handleResizeCanvas, handleImageDataChange, useImageSizeAsCanvasSize, useTransparency);
 
     return <canvas ref={setCanvas} />;
 }
@@ -37,7 +38,7 @@ function useDrawBackgroundImage(
     canvas: Nullable<HTMLCanvasElement>,
     image: HTMLImageElement,
     handleResizeCanvasToParent: () => void,
-    handleRGBAMatrixChange: RGBAMatrixHanlder,
+    handleImageDataChange: ImageDataHanlder,
     useImageSizeAsCanvasSize: boolean,
     useTransparency: boolean
 ) {
@@ -92,7 +93,9 @@ function useDrawBackgroundImage(
                             resizedImageWidth,
                             resizedImageHeight);
                     }
-                    handleRGBAMatrixChange(buildRGBAMatrixFromImageData(ctx.getImageData(0, 0, canvas.width, canvas.height)))
+                    if (canvas.width > 0 && canvas.height > 0) {
+                        handleImageDataChange(ctx.getImageData(0, 0, canvas.width, canvas.height))
+                    }
                 }
 
             }
@@ -150,18 +153,9 @@ function useSetInitialCanvasSize(handleResize: () => void) {
     useEffect(handleResize, [handleResize]);
 }
 
-type RGBAMatrixHanlder = (matrix: RGBAMatrix) => void;
+type ImageDataHanlder = (matrix: ImageData) => void;
 
 export default Canvas;
-
-function useBuildRGBAMatrix(canvas: Nullable<HTMLCanvasElement>, onRGBAMatrix: RGBAMatrixHanlder) {
-    const ctx = useCanvasContext(canvas);
-    useEffect(() => {
-        if (canvas && ctx) {
-            onRGBAMatrix(buildRGBAMatrixFromImageData(ctx.getImageData(0, 0, canvas.width, canvas.height)))
-        }
-    }, [ctx, canvas])
-}
 
 function useCanvasContext(canvas: Nullable<HTMLCanvasElement>) {
     return useMemo(() => canvas?.getContext('2d', { willReadFrequently: true }), [canvas]);
