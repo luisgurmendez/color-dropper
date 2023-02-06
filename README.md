@@ -23,21 +23,56 @@ To run the tests run `yarn test`
 
 ## Notes
 
-## Optimization: Reading ImageData
-    Calling `2dContext.getImageData` [is not a fast operation](https://stackoverflow.com/a/19502117/5794675)
-    to be called regularly, an optimization can be done by getting the ImageData once and calculating the
-    dropper's color matrix on mouse move, a performance test was done in branch `lg/preload-image-data-perf`.
-    It was detected that for BIG images (such as the `mountains.jpg` ~5Mb) calculating the colorMatrix 
-    beforehand was a really expensive task, so for this use case 
-    (specially with the use real image size setting on) I opt to call `getImageData` on mousemove
-    with the dropper's size instead. Using the `willReadFrequently` config of the context object
-    gave great results.
+I added some other features that wheren't in the problem description
+such as using the image real size, and using transparency on the colors, because I thought it 
+would be a good experiment to see how the solution would perform under more "preassure" (bigger canvas)
+
+### Code overview
+
+Without getting into too many implementation details, the idea of this solution is to use the canvas api
+to get the image data in the canvas. With this data, we can create a color matrix
+and build a component that uses this color matrix to draw a grid on top of the canvas that moves
+along with the mouse pointer.
 
 
-## Future Optimization: Drawing the Dropper in a canvas
-    In the future, as a fun test I would like to see how drawing the ColorDropper component inside a canvas
-    would perform instead of using plain html & css to draw the grid. I noted that using large number
-    of `<div>`s for the grid is not so great.
-    
-    Although everything that involves drawing shapes is not as easy as using css,
-    it would be really hard to maintain!
+### Optimizing building the ColorMatrix for the ColorDropper
+
+There are 2 approaches that I could think of when solving this issue:
+
+1. The first one was to generate an ImageData on mousemove with the bounds of what the ColorDropper
+will draw using the `getImageData` function of the canvas context. 
+Then build a HexMatrix with this data.
+
+2. The second approach is call `getImageData` once to get the ImageData ( or whenever we draw an image into the canvas),
+and when the mouse position changes we can calculate the HexMatrix using this data.
+
+
+For the first approach, since we use the `getImageData` for the bounds of the sub-square there are
+some great benefits regarding off-canvas color calculations. The downsides of this approach
+is having to call `getImageData` a lot.. I run some tests since calling `getImageData`
+[is not a fast operation](https://stackoverflow.com/a/19502117/5794675),  and it took around
+~4ms to perform this call. Altough using the `willReadFrequently` config of the context object
+gave much better results lowering the call to ~0.3ms. With this setting the whole flow of
+moving the mouse, getting the image data, building the HexMatrix and then rendering the
+`ColorDropper` it takes about ~3.5ms.
+
+The second approach involved working with the ImageData directly, and reading these values
+to calculate the HexMatrix everytime the mouse moves. Since the ImageData.data is of type
+`Uint8ClampedArray` this is an array that looks something like: [r,g,b,a,r,g,b,a,....,r,g,b,a]
+it wasn't too easy to work with, specially when the mouse pointer is near an edge. Besides that
+the performance was much better, the whole flow of mousemove and building the HexMatrix, and
+then rendering the `ColorDropper` it takes around ~2.6ms. The downsides of this approach is
+that we need to keep the ImageData in memory.
+
+Comparing both approaches, I think the second one is best, not because the performance 
+implications ~2.6ms < ~3.5ms, but because the `willReadFrequently` setting is not yet available
+in all browsers [Safari](https://bugs.webkit.org/show_bug.cgi?id=244117).
+
+
+### Future Optimization: Drawing the Dropper in a canvas
+In the future, as a fun test I would like to see how drawing the ColorDropper component inside a canvas
+would perform instead of using plain html & css to draw the grid. I noted that using large number
+of `<div>`s for the grid is not so great.
+
+Although everything that involves drawing shapes is not as easy as using css,
+it would be really hard to maintain!

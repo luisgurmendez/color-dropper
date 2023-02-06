@@ -185,5 +185,5 @@ function useBuildImageDataOnMouseMove(canvas: Nullable<HTMLCanvasElement>, onIma
 export default Canvas;
 
 function useCanvasContext(canvas: Nullable<HTMLCanvasElement>) {
-    return useMemo(() => canvas?.getContext('2d', { willReadFrequently: true }), [canvas]);
+    return useMemo(() => canvas?.getContext('2d', { willReadFrequently: false }), [canvas]);
 }
